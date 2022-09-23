@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Multi-BVH Player</title>
+	<meta charset="utf-8">
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<meta http-equiv="X-UA-Compatible" content="IE=11,chrome=1">
+	<!-- <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"> -->
+	<meta name="language" content="en-us" />
+	<link rel="shortcut icon" href="res/img/favicon.ico" type="image/x-icon" />
+	<link href="css/dianna.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" type="text/css" href="history/history.css" />
+
+</head>
+
+	<script src="js/three.min.66.js"></script>
+	<script src="js/BufferGeometryUtils.66.js"></script>
+	<script src="js/Bvh_multi.js"></script>
+	<script src='js/libs/dat.gui.min.js'></script>
+
+	<script>
+		var vsize = { x:100, y:100, z:0 };
+		var mouse = { x:0, y:0 };
+		var lightPos, camPos;
+
+		var inRender = true, inResize = false, isNeedPause = false;
+		var FAR = 2000;
+
+		var ToRad = Math.PI / 180;
+		var ToDeg = 180 / Math.PI;
+
+		var camera1, camera2, camera3;
+		var container1, container2, container3;
+		var scene1, scene2, scene3;
+		var renderer1, renderer2, renderer3;
+		var composer, renderPass, delta, center, centerLight;
+		var ambient1, ambient2, ambient3
+		var hemiLight1, hemiLight2, hemiLight3
+		var pointLight1, pointLight2, pointLight3
+		var light1, light2, light3;
+		var body, suit, bodyNeck, bodyHead, head, neck, hair, eyeR, eyeL, teethUp, teethDown, eyeTop, tongue, troat, headBase, fakeNeck, eyesTarget;
+	
+		var materials = []; 
+		var clock = new THREE.Clock();
+		var ground1, ground2, ground3;
+
+		var gui1;
+		// var gui2;
+		// var gui3;
+		var animConfig = {
+			current:"none",
+			//neckmove:false, 
+			idle:false,
+			walk:true,
+			salut:false,
+			speed:0.8
+		}
+
+		var viewConfig = {
+			squeleton:false,
+			antialias:false,
+			withEffect:false,
+			withNormal:false,
+			withBump:true
+		};
+
+		var sky1, sky2, sky3;
+		var skyCube;
+
+		var debug1;
+		var debug2;
+		var debug3;
+
+		var bvhReader1 = null;
+		var bvhReader2 = null;
+		var bvhReader3 = null;
+
+		var displayModel = true;
+		var squeleton;
+		var bonesReference = [];
+
+
+		var SeaStandard = false;
+		var BonesRevers = true;
+
+		var f5, f6, f7;
+		var currentFrameController;
+
+		var maxNumFrames = 0;
+		var doneLoadingFiles = false;
+
+		var guiPointer = null;
+
+		function init() {
+
+			out11 = document.getElementById("output11");
+			out12 = document.getElementById("output12");
+			out21 = document.getElementById("output21");
+			out22 = document.getElementById("output22");
+			out31 = document.getElementById("output31");
+			out32 = document.getElementById("output32");
+
+			vsize.x = (window.innerWidth - 210) / 3 - 4;
+			vsize.y = window.innerHeight;
+			vsize.z = vsize.x / vsize.y;
+
+			camPos = { horizontal: 90, vertical: 80, distance: 200, automove: false };
+			lightPos = { horizontal: 135, vertical: 35, distance: 200 };
+            mouse = { ox:0, oy:0, h:0, v:0, mx:0, my:0, down:false, over:false, moving:true, dx:0, dy:0 };
+
+            if(SeaStandard)lightPos.horizontal+=180;
+
+			debug1 = document.getElementById("debug1");
+			debug2 = document.getElementById("debug2");
+			debug3 = document.getElementById("debug3");
+
+			// document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+			container1 = document.getElementById("viewport1");
+			container2 = document.getElementById("viewport2");
+			container3 = document.getElementById("viewport3");
+
+			addGUI();
+
+			initScene3D();
+
+		}
+
+		function trySubmitFiles(files) {
+			if (this.disabled) return;
+			if (!files.length) return;
+			if (files.length > 3) {
+				alert("Max 3 bvh files.");
+				return
+			}
+			else {
+				this.readmultifiles(files);
+				console.log(files);
+			}
+		}
+
+		function readmultifiles(files) {
+			var reader = new FileReader();  
+			function readFile(index) {
+				if ( index >= files.length ) {
+					doneLoadingFiles = true;
+					// console.log(guiPointer);
+					gui1.domElement.style.pointerEvents = guiPointer;
+					gui1.domElement.style.opacity = 1.0;
+					console.log('Done loading files.')
+
+					// play all at the same time
+					bvhReader1.play = false; 
+					// bvhReader1.frame = parseInt(BVHanimConfig.current); 
+					bvhReader1.frame = 1;
+					bvhReader1.oldFrame = bvhReader1.frame; 
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.startTime = Date.now();
+					bvhReader1.play = true;
+
+					if (bvhReader2.index !== null) {
+						bvhReader2.play = false; 
+						// bvhReader2.frame = parseInt(BVHanimConfig.current); 
+						bvhReader2.frame = 1;
+						bvhReader2.oldFrame = bvhReader2.frame; 
+						bvhReader2.showCurrentFrame(); 
+						bvhReader2.startTime = bvhReader1.startTime;
+						bvhReader2.play = true;
+					}
+					
+					if (bvhReader3.index !== null) {
+						bvhReader3.play = false; 
+						// bvhReader3.frame = parseInt(BVHanimConfig.current); 
+						bvhReader3.frame = 1;
+						bvhReader3.oldFrame = bvhReader3.frame; 
+						bvhReader3.showCurrentFrame(); 
+						bvhReader3.startTime = bvhReader1.startTime;
+						bvhReader3.play = true;
+					}
+					
+					return;
+				}
+				var file = files[index];
+				reader.onload = function(e) {
+					// console.log(files.length);
+					// console.log(index);
+					// console.log(e.target.result.split(/\s+/g));
+					if (index == 0) {
+						bvhReader1.parseData(index, e.target.result.split(/\s+/g));
+
+						f5.remove(currentFrameController);
+						maxNumFrames = Math.max(bvhReader1.numFrames);
+						// console.log(maxNumFrames)
+						currentFrameController = f5.add( BVHanimConfig, 'current', 1, maxNumFrames );
+						currentFrameController.onChange( function() { 
+							// console.log(bvhReader1.numFrames); 
+							// currentFrameController.updateDisplay();
+							bvhReader1.play = false; 
+							// bvhReader1.frame = parseInt(BVHanimConfig.current); 
+							bvhReader1.frame = parseInt(BVHanimConfig.current / maxNumFrames * bvhReader1.numFrames);
+							bvhReader1.oldFrame = bvhReader1.frame; 
+							bvhReader1.startTime = Date.now(); 
+							bvhReader1.showCurrentFrame(); 
+						});
+					}
+					else if (index == 1) {
+						bvhReader2.parseData(index, e.target.result.split(/\s+/g));
+
+						f5.remove(currentFrameController);
+						maxNumFrames = Math.max(bvhReader1.numFrames, bvhReader2.numFrames);
+						// console.log(maxNumFrames)
+						currentFrameController = f5.add( BVHanimConfig, 'current', 1, maxNumFrames );
+						currentFrameController.onChange( function() { 
+							// console.log(bvhReader1.numFrames); 
+							// currentFrameController.updateDisplay();
+							bvhReader1.play = false; 
+							// bvhReader1.frame = parseInt(BVHanimConfig.current); 
+							bvhReader1.frame = parseInt(BVHanimConfig.current / maxNumFrames * bvhReader1.numFrames);
+							bvhReader1.oldFrame = bvhReader1.frame; 
+							bvhReader1.startTime = Date.now(); 
+							bvhReader1.showCurrentFrame(); 
+
+							bvhReader2.play = false; 
+							// bvhReader2.frame = parseInt(BVHanimConfig.current); 
+							bvhReader2.frame = parseInt(BVHanimConfig.current / maxNumFrames * bvhReader2.numFrames);
+							bvhReader2.oldFrame = bvhReader2.frame; 
+							bvhReader2.startTime = bvhReader1.startTime; 
+							bvhReader2.showCurrentFrame(); 
+						});
+					}
+					else {
+						bvhReader3.parseData(index, e.target.result.split(/\s+/g));
+
+						f5.remove(currentFrameController);
+						maxNumFrames = Math.max(bvhReader1.numFrames, bvhReader2.numFrames, bvhReader3.numFrames);
+						// console.log(maxNumFrames)
+						currentFrameController = f5.add( BVHanimConfig, 'current', 1, maxNumFrames );
+						currentFrameController.onChange( function() { 
+							// console.log(bvhReader1.numFrames); 
+							// currentFrameController.updateDisplay();
+							bvhReader1.play = false; 
+							// bvhReader1.frame = parseInt(BVHanimConfig.current); 
+							bvhReader1.frame = parseInt(BVHanimConfig.current / maxNumFrames * bvhReader1.numFrames);
+							bvhReader1.oldFrame = bvhReader1.frame; 
+							bvhReader1.startTime = Date.now(); 
+							bvhReader1.showCurrentFrame(); 
+
+							bvhReader2.play = false; 
+							// bvhReader2.frame = parseInt(BVHanimConfig.current); 
+							bvhReader2.frame = parseInt(BVHanimConfig.current / maxNumFrames * bvhReader2.numFrames);
+							bvhReader2.oldFrame = bvhReader2.frame; 
+							bvhReader2.startTime = bvhReader1.startTime; 
+							bvhReader2.showCurrentFrame(); 
+
+							bvhReader3.play = false; 
+							// bvhReader3.frame = parseInt(BVHanimConfig.current); 
+							bvhReader3.frame = parseInt(BVHanimConfig.current / maxNumFrames * bvhReader3.numFrames);
+							bvhReader3.oldFrame = bvhReader3.frame; 
+							bvhReader3.startTime = bvhReader1.startTime; 
+							bvhReader3.showCurrentFrame(); 
+						});
+					}
+
+					readFile(index+1);
+				}
+				reader.readAsText(file);
+			}
+			readFile(0);
+
+			function setup_reader(index, file) {
+				var name = file.name;
+				var reader = new FileReader();
+
+				// var ul = document.createElement("ul");
+				// document.getElementById('bag'+(index+1)).appendChild(ul);
+				// reader.onload = function(e) {
+				// 	var li = document.createElement("li");
+				// 	li.innerHTML = name;
+				// 	ul.appendChild(li);
+				// }
+				document.getElementById('bag'+(index+1)).innerHTML = name;
+				reader.readAsText(file);
+			}
+
+			for (var i = 0; i < files.length; i++) {
+				setup_reader(i, files[i]); 
+			}
+		}
+
+		function debugTell(index, s) {
+			// console.log('debugTell: ' + index);
+			if (index == 0) debug1.innerHTML = s;
+			else if (index == 1) debug2.innerHTML = s;
+			else debug3.innerHTML = s;
+		}
+
+		function initScene3D() {
+			
+			// RENDERER
+			renderer1 = new THREE.WebGLRenderer({  antialias: false });
+			renderer1.setSize( vsize.x, vsize.y );
+			renderer1.autoClear = false;
+			//renderer1.sortObjects = false;
+			renderer1.gammaInput = true;
+			renderer1.gammaOutput = true;
+			renderer1.shadowMapEnabled = true;
+			//renderer1.shadowMapCullFace = THREE.CullFaceBack;
+			renderer1.shadowMapType = THREE.PCFSoftShadowMap;
+
+			container1 = document.getElementById("viewport1");
+            container1.appendChild( renderer1.domElement );
+			renderer1.domElement.style.top = 0 + "px";
+			renderer1.domElement.style.left = 0 + "px";
+			renderer1.domElement.style.position = "absolute";
+
+
+			renderer2 = new THREE.WebGLRenderer({  antialias: false });
+			renderer2.setSize( vsize.x, vsize.y );
+			renderer2.autoClear = false;
+			//renderer2.sortObjects = false;
+			renderer2.gammaInput = true;
+			renderer2.gammaOutput = true;
+			renderer2.shadowMapEnabled = true;
+			//renderer2.shadowMapCullFace = THREE.CullFaceBack;
+			renderer2.shadowMapType = THREE.PCFSoftShadowMap;
+
+			container2 = document.getElementById("viewport2");
+            container2.appendChild( renderer2.domElement );
+			renderer2.domElement.style.top = 0 + "px";
+			renderer2.domElement.style.left = 0 + "px";
+			renderer2.domElement.style.position = "absolute";
+
+
+			renderer3 = new THREE.WebGLRenderer({  antialias: false });
+			renderer3.setSize( vsize.x, vsize.y );
+			renderer3.autoClear = false;
+			//renderer3.sortObjects = false;
+			renderer3.gammaInput = true;
+			renderer3.gammaOutput = true;
+			renderer3.shadowMapEnabled = true;
+			//renderer3.shadowMapCullFace = THREE.CullFaceBack;
+			renderer3.shadowMapType = THREE.PCFSoftShadowMap;
+
+			container3 = document.getElementById("viewport3");
+            container3.appendChild( renderer3.domElement );
+			renderer3.domElement.style.top = 0 + "px";
+			renderer3.domElement.style.left = 0 + "px";
+			renderer3.domElement.style.position = "absolute";
+
+
+			// SCENE
+			scene1 = new THREE.Scene();
+			scene2 = new THREE.Scene();
+			scene3 = new THREE.Scene();
+
+			// CAMERA
+			camera1 = new THREE.PerspectiveCamera( 45, vsize.z, 1, FAR );
+			//camera1.position.set( 0, 30, 100 );
+			camera2 = new THREE.PerspectiveCamera( 45, vsize.z, 1, FAR );
+			//camera2.position.set( 0, 30, 100 );
+			camera3 = new THREE.PerspectiveCamera( 45, vsize.z, 1, FAR );
+			//camera3.position.set( 0, 30, 100 );
+		    center = new THREE.Vector3(0,30,0);
+		    centerLight =  new THREE.Vector3(0,-45,0);
+		    moveCamera();
+
+
+			addBasicObject();
+
+			initLightAndSky();
+
+			//importBody();
+
+			window.addEventListener( 'resize', resize, false );
+			container1.addEventListener( 'mousemove', onMouseMove, false );
+		    container1.addEventListener( 'mousedown', onMouseDown, false );
+		    container1.addEventListener( 'mouseout', onMouseUp, false );
+		    container1.addEventListener( 'mouseup', onMouseUp, false );
+			container2.addEventListener( 'mousemove', onMouseMove, false );
+		    container2.addEventListener( 'mousedown', onMouseDown, false );
+		    container2.addEventListener( 'mouseout', onMouseUp, false );
+		    container2.addEventListener( 'mouseup', onMouseUp, false );
+			container3.addEventListener( 'mousemove', onMouseMove, false );
+		    container3.addEventListener( 'mousedown', onMouseDown, false );
+		    container3.addEventListener( 'mouseout', onMouseUp, false );
+		    container3.addEventListener( 'mouseup', onMouseUp, false );
+
+		    var body = document.body;
+		    if( body.addEventListener ){
+		        body.addEventListener( 'mousewheel', onMouseWheel, { passive: false } ); //chrome
+		        body.addEventListener( 'DOMMouseScroll', onMouseWheel, { passive: false } ); // firefox
+		    }else if( body.attachEvent ){
+		        body.attachEvent("onmousewheel" , onMouseWheel, { passive: false }); // ie
+		    }
+		    animate();
+
+		    initBVH();
+		}
+
+
+
+		//-----------------------------------------------------
+		//
+		//  RENDER LOOP
+		//
+		//-----------------------------------------------------
+
+		function animate() {
+			requestAnimationFrame( animate );
+			render();
+		}
+
+		function render() {
+			updateBVH();
+			renderer1.clear();
+			renderer1.render( scene1, camera1 );
+			renderer2.clear();
+			renderer2.render( scene2, camera2 );
+			renderer3.clear();
+			renderer3.render( scene3, camera3 );
+		}
+
+
+
+		//-----------------------------------------------------
+		//  LISTENER
+		//-----------------------------------------------------
+
+		function resize( event ) {
+			vsize.x = (window.innerWidth - 210) / 3 - 4;
+			vsize.y = window.innerHeight;
+			vsize.z = vsize.x / vsize.y;
+			camera1.aspect = vsize.z;
+			camera1.updateProjectionMatrix();
+			camera2.aspect = vsize.z;
+			camera2.updateProjectionMatrix();
+			camera3.aspect = vsize.z;
+			camera3.updateProjectionMatrix();
+			renderer1.setSize( vsize.x, vsize.y );
+			renderer2.setSize( vsize.x, vsize.y );
+			renderer3.setSize( vsize.x, vsize.y );
+		}
+
+
+
+		//-----------------------------------------------------
+		//  LIGHT & SKY
+		//-----------------------------------------------------
+
+		function initLightAndSky(){
+
+			ambient1 = new THREE.AmbientLight( 0x202020 );
+			ambient2 = new THREE.AmbientLight( 0x202020 );
+			ambient3 = new THREE.AmbientLight( 0x202020 );
+			scene1.add( ambient1 );
+			scene2.add( ambient2 );
+			scene3.add( ambient3 );
+
+			hemiLight1 = new THREE.HemisphereLight( 0x202020, 0xffffff, 1 );
+			hemiLight1.position.set( 0, 20, 0 );
+			hemiLight2 = new THREE.HemisphereLight( 0x202020, 0xffffff, 1 );
+			hemiLight2.position.set( 0, 20, 0 );
+			hemiLight3 = new THREE.HemisphereLight( 0x202020, 0xffffff, 1 );
+			hemiLight3.position.set( 0, 20, 0 );
+			scene1.add( hemiLight1 );
+			scene2.add( hemiLight2 );
+			scene3.add( hemiLight3 );
+
+			pointLight1 = new THREE.PointLight( 0xFFFFFF, 1, 600 );
+			pointLight2 = new THREE.PointLight( 0xFFFFFF, 1, 600 );
+			pointLight3 = new THREE.PointLight( 0xFFFFFF, 1, 600 );
+			scene1.add( pointLight1 );
+			scene2.add( pointLight2 );
+			scene3.add( pointLight3 );
+
+			light1 = new THREE.SpotLight( 0xFFFFFF, 1, 0, Math.PI/2, 1 );
+			light1.castShadow = true;
+			light1.onlyShadow = false;
+			light1.shadowCameraNear = 50;
+			light1.shadowCameraFar = 500;
+			//light1.shadowCameraFov = 35;
+			light1.shadowBias = -0.005;
+			light1.shadowMapWidth = light1.shadowMapHeight = 1024;
+			light1.shadowDarkness = 0.35;
+			light2 = new THREE.SpotLight( 0xFFFFFF, 1, 0, Math.PI/2, 1 );
+			light2.castShadow = true;
+			light2.onlyShadow = false;
+			light2.shadowCameraNear = 50;
+			light2.shadowCameraFar = 500;
+			//light2.shadowCameraFov = 35;
+			light2.shadowBias = -0.005;
+			light2.shadowMapWidth = light2.shadowMapHeight = 1024;
+			light2.shadowDarkness = 0.35;
+			light3 = new THREE.SpotLight( 0xFFFFFF, 1, 0, Math.PI/2, 1 );
+			light3.castShadow = true;
+			light3.onlyShadow = false;
+			light3.shadowCameraNear = 50;
+			light3.shadowCameraFar = 500;
+			//light3.shadowCameraFov = 35;
+			light3.shadowBias = -0.005;
+			light3.shadowMapWidth = light3.shadowMapHeight = 1024;
+			light3.shadowDarkness = 0.35;
+
+			moveLight();
+			
+			//light1.shadowCameraVisible = true; 
+			//light2.shadowCameraVisible = true; 
+			//light3.shadowCameraVisible = true; 
+
+			scene1.add( light1 );
+			scene2.add( light2 );
+			scene3.add( light3 );
+		}	
+
+		function moveLight() {
+		    light1.position.copy(Orbit(centerLight, lightPos.horizontal, lightPos.vertical, lightPos.distance));
+			light2.position.copy(Orbit(centerLight, lightPos.horizontal, lightPos.vertical, lightPos.distance));
+			light3.position.copy(Orbit(centerLight, lightPos.horizontal, lightPos.vertical, lightPos.distance));
+
+		    pointLight1.position.copy(Orbit(centerLight, lightPos.horizontal+180, lightPos.vertical+180, lightPos.distance));
+			pointLight2.position.copy(Orbit(centerLight, lightPos.horizontal+180, lightPos.vertical+180, lightPos.distance));
+			pointLight3.position.copy(Orbit(centerLight, lightPos.horizontal+180, lightPos.vertical+180, lightPos.distance));
+
+		    light1.lookAt(centerLight);
+			light2.lookAt(centerLight);
+			light3.lookAt(centerLight);
+		}
+		
+		function lightColors( cc ){
+			ambient1.color.setHex(cc[2]);
+			ambient2.color.setHex(cc[2]);
+			ambient3.color.setHex(cc[2]);
+
+			hemiLight1.color.setHex( cc[2] );
+			hemiLight1.groundColor.setHex( cc[0] );
+			hemiLight2.color.setHex( cc[2] );
+			hemiLight2.groundColor.setHex( cc[0] );
+			hemiLight3.color.setHex( cc[2] );
+			hemiLight3.groundColor.setHex( cc[0] );
+
+			pointLight1.color.setHex( cc[1] );
+			pointLight2.color.setHex( cc[1] );
+			pointLight3.color.setHex( cc[1] );
+
+			light1.color.setHex( cc[3] );
+			light2.color.setHex( cc[3] );
+			light3.color.setHex( cc[3] );
+
+			currentColors = cc;
+		}
+
+		function addBasicObject() {
+			var skyMaterial1 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial2 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial3 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
+		    sky1 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial1 );
+			sky2 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial2 );
+			sky3 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial3 );
+			scene1.add( sky1 );
+			scene2.add( sky2 );
+			scene3.add( sky3 );
+
+			var groundMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			var blendings1 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			groundMaterial1.blending = THREE[ blendings1[ 4 ] ];
+			ground1 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial1);
+			ground1.position.set( 0, 0, 0 );
+			ground1.rotation.x = - Math.PI / 2;
+			ground1.receiveShadow = true;
+			var groundMaterial2 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			var blendings2 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			groundMaterial2.blending = THREE[ blendings2[ 4 ] ];
+			ground2 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial2);
+			ground2.position.set( 0, 0, 0 );
+			ground2.rotation.x = - Math.PI / 2;
+			ground2.receiveShadow = true;
+			var groundMaterial3 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			var blendings3 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			groundMaterial3.blending = THREE[ blendings3[ 4 ] ];
+			ground3 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial3);
+			ground3.position.set( 0, 0, 0 );
+			ground3.rotation.x = - Math.PI / 2;
+			ground3.receiveShadow = true;
+			scene1.add( ground1 );
+			scene2.add( ground2 );
+			scene3.add( ground3 );
+
+			var helper21 = new THREE.GridHelper( 100, 50 );
+			helper21.setColors( 0x00ff00, 0x888888 );
+			var helper22 = new THREE.GridHelper( 100, 50 );
+			helper22.setColors( 0x00ff00, 0x888888 );
+			var helper23 = new THREE.GridHelper( 100, 50 );
+			helper23.setColors( 0x00ff00, 0x888888 );
+			scene1.add( helper21 );
+			scene2.add( helper22 );
+			scene3.add( helper23 );
+		}
+
+
+
+		//-----------------------------------------------------
+		//  BVH TEST
+		//-----------------------------------------------------
+
+		var BVHset = {ax:"x", ay:"y", az:"z", dx:1, dy:1, dz:1, rx:0, ry:0, rz:0, order:"XYZ"};
+		var BVHanimConfig = {
+			debug:true,
+			speed:1,
+			skeletonSize:1,
+			px:0, py:0, pz:0,
+			boneSize:1.5,
+			n_past:90,
+			n_trans:30,
+			n_future:90,
+			current:1
+		}
+
+		function initBVH() {
+			bvhReader1 = new BVH.Reader();
+			// bvhReader1.speed = BVHanimConfig.speed;
+			bvhReader2 = new BVH.Reader();
+			// bvhReader2.speed = BVHanimConfig.speed;
+			bvhReader3 = new BVH.Reader();
+			// bvhReader3.speed = BVHanimConfig.speed;
+
+			initBVHGui();
+		}
+
+		function initBVHGui(n=1000) {
+
+			f6 = gui1.addFolder('BVH Skeleton');
+			f7 = gui1.addFolder('BVH Animation Rendering');
+			f5 = gui1.addFolder('BVH Animation Playback');
+
+            BVHanimConfig.pause = function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.play = false;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.play = false;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.play = false;
+				}
+			};
+            BVHanimConfig.play = function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.frame = bvhReader1.frame; 
+					bvhReader1.oldFrame = bvhReader1.frame;
+					bvhReader1.startTime = Date.now();
+					bvhReader1.play = true;
+				}
+				if (bvhReader2.index !== null) {
+					// bvhReader2.frame = bvhReader1.frame; 
+					bvhReader2.frame = parseInt(bvhReader1.frame / bvhReader1.numFrames * bvhReader2.numFrames);
+					bvhReader2.oldFrame = bvhReader2.frame;
+					bvhReader2.startTime = bvhReader1.startTime;
+					bvhReader2.play = true;
+				}
+				if (bvhReader3.index !== null) {
+					// bvhReader3.frame = bvhReader1.frame; 
+					bvhReader3.frame = parseInt(bvhReader1.frame / bvhReader1.numFrames * bvhReader3.numFrames);
+					bvhReader3.oldFrame = bvhReader3.frame;
+					bvhReader3.startTime = bvhReader1.startTime;
+					bvhReader3.play = true;
+				}
+			};
+            BVHanimConfig.next = function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.next();
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.next();
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.next();
+				}
+			};
+            BVHanimConfig.prev = function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.prev();
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.prev();
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.prev();
+				}
+			};
+
+            f5.add( BVHanimConfig, 'speed', 0.1, 2 ).onChange( function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.speed = BVHanimConfig.speed;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.speed = BVHanimConfig.speed;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.speed = BVHanimConfig.speed;
+				}
+			});;
+
+            f5.add( BVHanimConfig, 'play' );
+			f5.add( BVHanimConfig, 'pause' );
+			f5.add( BVHanimConfig, 'prev' );
+            f5.add( BVHanimConfig, 'next' );
+			currentFrameController = f5.add( BVHanimConfig, 'current', 1, 1000 );
+			currentFrameController.onChange( function() { 
+				// console.log(bvhReader1.numFrames); 
+				// currentFrameController.updateDisplay();
+
+				if (bvhReader1.index !== null) {
+					bvhReader1.play = false; 
+					bvhReader1.frame = parseInt(BVHanimConfig.current); 
+					bvhReader1.oldFrame = bvhReader1.frame; 
+					bvhReader1.startTime = Date.now();
+					bvhReader1.showCurrentFrame(); 
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.play = false; 
+					bvhReader2.frame = parseInt(BVHanimConfig.current); 
+					bvhReader2.oldFrame = bvhReader2.frame; 
+					bvhReader2.startTime = bvhReader1.startTime;
+					bvhReader2.showCurrentFrame(); 
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.play = false; 
+					bvhReader3.frame = parseInt(BVHanimConfig.current); 
+					bvhReader3.oldFrame = bvhReader3.frame; 
+					bvhReader3.startTime = bvhReader1.startTime;
+					bvhReader3.showCurrentFrame(); 
+				}
+			});
+
+            f6.add( BVHanimConfig, 'px', -100, 100 ).onChange( function() { positionBVH() });;
+            f6.add( BVHanimConfig, 'py', -100, 100 ).onChange( function() { positionBVH() });;
+            f6.add( BVHanimConfig, 'pz', -100, 100 ).onChange( function() { positionBVH() });;
+            f6.add( BVHanimConfig, 'boneSize', 0.5, 5 ).onChange( function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.boneSize = BVHanimConfig.boneSize;
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.play = true;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.boneSize = BVHanimConfig.boneSize;
+					bvhReader2.showCurrentFrame(); 
+					bvhReader2.play = true;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.boneSize = BVHanimConfig.boneSize;
+					bvhReader3.showCurrentFrame(); 
+					bvhReader3.play = true;
+				}
+			});
+			f6.add( BVHanimConfig, 'skeletonSize', 0.1, 5 ).onChange( function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.reScale(BVHanimConfig.skeletonSize);
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.play = true;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.reScale(BVHanimConfig.skeletonSize);
+					bvhReader2.showCurrentFrame(); 
+					bvhReader2.play = true;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.reScale(BVHanimConfig.skeletonSize);
+					bvhReader3.showCurrentFrame(); 
+					bvhReader3.play = true;
+				}
+			});
+
+			f7.add( BVHanimConfig, 'n_past', 0, 180 ).onChange( function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.n_past = BVHanimConfig.n_past;
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.play = true;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.n_past = BVHanimConfig.n_past;
+					bvhReader2.showCurrentFrame(); 
+					bvhReader2.play = true;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.n_past = BVHanimConfig.n_past;
+					bvhReader3.showCurrentFrame(); 
+					bvhReader3.play = true;
+				}
+			});
+			f7.add( BVHanimConfig, 'n_trans', 0, 120 ).onChange( function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.n_trans = BVHanimConfig.n_trans;
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.play = true;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.n_trans = BVHanimConfig.n_trans;
+					bvhReader2.showCurrentFrame(); 
+					bvhReader2.play = true;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.n_trans = BVHanimConfig.n_trans;
+					bvhReader3.showCurrentFrame(); 
+					bvhReader3.play = true;
+				}
+			});
+			f7.add( BVHanimConfig, 'n_future', 0, 180 ).onChange( function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.n_future = BVHanimConfig.n_future;
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.play = true;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.n_future = BVHanimConfig.n_future;
+					bvhReader2.showCurrentFrame(); 
+					bvhReader2.play = true;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.n_future = BVHanimConfig.n_future;
+					bvhReader3.showCurrentFrame(); 
+					bvhReader3.play = true;
+				}
+				if (bvhReader1.index == null) {
+					console.log(f7);
+				}
+			});
+
+			f5.open();
+			f6.open();
+			f7.open();
+
+		}
+		function positionBVH() {
+			if (bvhReader1.index !== null) {
+				bvhReader1.rePosition(new THREE.Vector3( BVHanimConfig.px || 0, BVHanimConfig.py|| 0, BVHanimConfig.pz|| 0 ));
+				bvhReader1.showCurrentFrame(); 
+				bvhReader1.play = true;
+			}
+			if (bvhReader2.index !== null) {
+				bvhReader2.rePosition(new THREE.Vector3( BVHanimConfig.px || 0, BVHanimConfig.py|| 0, BVHanimConfig.pz|| 0 ));
+				bvhReader2.showCurrentFrame(); 
+				bvhReader2.play = true;
+			}
+			if (bvhReader3.index !== null) {
+				bvhReader3.rePosition(new THREE.Vector3( BVHanimConfig.px || 0, BVHanimConfig.py|| 0, BVHanimConfig.pz|| 0 ));
+				bvhReader3.showCurrentFrame(); 
+				bvhReader3.play = true;
+			}
+		}
+
+		function updateBVH() {
+			if (bvhReader1 !== null && bvhReader1.play) {
+				bvhReader1.update();
+			}
+			if (bvhReader2 !== null && bvhReader2.play) {
+				bvhReader2.update();
+				// bvhReader2.frame = bvhReader1.frame;
+				bvhReader2.frame = parseInt(bvhReader1.frame / bvhReader1.numFrames * bvhReader2.numFrames);
+			}
+			if (bvhReader3 !== null && bvhReader3.play) {
+				bvhReader3.update();
+				// bvhReader3.frame = bvhReader1.frame;
+				bvhReader3.frame = parseInt(bvhReader1.frame / bvhReader1.numFrames * bvhReader3.numFrames);
+			}
+		}
+ 
+		function toAngles(o) {
+			var q = o.quaternion.clone();
+			var x = q.x, 
+				y = q.y, 
+				z = q.z, 
+				w = q.w;
+			
+			var a = 2 * (w * y - z * x);
+			
+			if (a < -1) a = -1;
+			else if (a > 1) a = 1; 
+			
+			return {
+				x : Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)) * 1,
+				y : Math.asin(a) * 1,
+				z : Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)) * 1
+			}
+		}
+
+		function traceMatrix(o, n) {
+				var e = o.matrix.elements
+				var s = o.name+"<br>";
+				var q = o.quaternion.clone();
+				//s+=( q.x ).toFixed(2)+ "_"+ ( q.y ).toFixed(2) +  "_"+ (q.z).toFixed(2)+ "_"+  (q.w).toFixed(2);
+				//s+=( b.rot.x * ToDeg ).toFixed(2)+ "_"+ ( b.rot.y * ToDeg ).toFixed(2) +  "_"+ ( b.rot.z * ToDeg ).toFixed(2);
+
+				//s+= "<br>"
+
+				s+=( o.rotation.x * ToDeg ).toFixed(2)+ "_"+ ( o.rotation.y * ToDeg ).toFixed(2) +  "_"+ ( o.rotation.z * ToDeg ).toFixed(2)+ "_"+ o.rotation.order;
+
+				s+= "<br>"
+
+				s += "_"+ e[0].toFixed(2) + "_" + e[1].toFixed(2) + "_"+ e[2].toFixed(2) + "_" + e[3] + "<br>";
+				s += "_"+ e[4].toFixed(2) + "_" + e[5].toFixed(2) + "_"+ e[6].toFixed(2) + "_" + e[7] + "<br>";
+				s += "_"+ e[8].toFixed(2) + "_" + e[9].toFixed(2) + "_"+ e[10].toFixed(2) + "_" + e[11] + "<br>";
+				s += "_"+ e[12] + "_" + e[13] + "_"+ e[14] + "_" + e[15] + "<br>";
+				
+				if(n===1) out11.innerHTML = s;
+				else out12.innerHTML = s;
+			}
+
+
+
+		//-----------------------------------------------------
+		//  GUI
+		//-----------------------------------------------------
+
+		function addGUI() {
+			gui1 = new dat.GUI({autoPlace:false, width:204});
+			document.getElementById('gui1').appendChild(gui1.domElement);
+			// gui2 = new dat.GUI({autoPlace:false, width:204});
+			// document.getElementById('gui2').appendChild(gui2.domElement);
+			// gui3 = new dat.GUI({autoPlace:false, width:204});
+			// document.getElementById('gui3').appendChild(gui3.domElement);
+
+			guiPointer = gui1.domElement.style.pointerEvents;
+			gui1.domElement.style.pointerEvents = "none";
+			gui1.domElement.style.opacity = 0.5;
+		}
+		
+		function tell(index, s){
+			document.getElementById("debug"+(index+1)).innerHTML = s;
+		}
+
+		
+
+		//-----------------------------------
+		// MATH
+		//-----------------------------------
+
+		function Orbit(origine, horizontal, vertical, distance) {
+		    var p = new THREE.Vector3();
+		    var phi = vertical*ToRad;
+		    var theta = horizontal*ToRad;
+		    p.x = (distance * Math.sin(phi) * Math.cos(theta)) + origine.x;
+		    p.z = (distance * Math.sin(phi) * Math.sin(theta)) + origine.z;
+		    p.y = (distance * Math.cos(phi)) + origine.y;
+		    return p;
+		}
+
+		//-----------------------------------
+		// MOUSE & NAVIGATION 
+		//-----------------------------------
+
+		var changeView = function (h, v, d) {
+			TweenLite.to(camPos, 3, {horizontal: h, vertical: v, distance: d, onUpdate: moveCamera });
+			camPos.automove = true;
+		}
+
+		function moveCamera() {
+		    camera1.position.copy(Orbit(center, camPos.horizontal, camPos.vertical, camPos.distance));
+		    camera1.lookAt(center);
+			camera2.position.copy(Orbit(center, camPos.horizontal, camPos.vertical, camPos.distance));
+		    camera2.lookAt(center);
+			camera3.position.copy(Orbit(center, camPos.horizontal, camPos.vertical, camPos.distance));
+		    camera3.lookAt(center);
+		}
+
+		function onMouseDown(e) {
+		    e.preventDefault();
+		    mouse.ox = e.clientX;
+		    mouse.oy = e.clientY;
+		    mouse.h = camPos.horizontal;
+		    mouse.v = camPos.vertical;
+		    mouse.down = true;
+		}
+
+		function onMouseUp(e) {
+		    mouse.down = false;
+		    document.body.style.cursor = 'auto';
+		}
+
+		function onMouseMove(e) {
+		    e.preventDefault();
+		    if (mouse.down ) {
+		        document.body.style.cursor = 'move';
+		        if(SeaStandard)camPos.horizontal = (-(e.clientX - mouse.ox) * 0.3) + mouse.h;
+		        else camPos.horizontal = ((e.clientX - mouse.ox) * 0.3) + mouse.h;
+		        camPos.vertical = (-(e.clientY - mouse.oy) * 0.3) + mouse.v;
+
+		        moveCamera();
+		    } else {
+		    	mouse.ox = e.clientX;
+			    mouse.oy = e.clientY;
+		    }
+		}
+
+		function onMouseWheel(e) {
+		    var delta = 0;
+		    if(e.wheelDelta){delta=e.wheelDelta*-1;}
+		    else if(e.detail){delta=e.detail*20;}
+		    camPos.distance+=(delta/10);
+
+		    moveCamera();   
+		    e.preventDefault();
+		}
+
+		window.onload = init;
+
+	</script>
+
+	<body>
+		<div id="v0">
+			<div id="guiContener1"><div id="gui1"></div></div>
+			<!-- <div id="copy1">
+				BVH player <a href="http://3dflashlo.wordpress.com/" target="_blank">&nbsp;&nbsp;&nbsp;loth 2014&nbsp;&nbsp;&nbsp;</a>
+			</div> -->
+			<!-- <input type="file" id="files" multiple="multiple" accept=".bvh"/> -->
+			<input type="file" id="filesx" name="filesx[]" onchange="trySubmitFiles(this.files)" multiple="" accept=".bvh"/>
+		</div>
+
+		<div id="v1">
+			<div id="viewport1"></div>
+			<div id="hubs1">
+				<div id="debug1"></div>
+				<div id="bag1"></div>
+			</div>
+
+			<div id="BVHhubs"></div>
+
+			<div id="output11"></div>
+			<div id="output12"></div>
+		</div>
+		
+
+		<div id="v2">
+			<div id="viewport2"></div>
+			<div id="hubs2">
+				<div id="debug2"></div>
+				<!-- <div id="guiContener2"><div id="gui2"></div></div> -->
+				<div id="bag2"></div>
+			</div>
+
+			<div id="output21"></div>
+			<div id="output22"></div>
+		</div>
+
+		
+		<div id="v3">
+			<div id="viewport3"></div>
+			<div id="hubs3">
+				<div id="debug3"></div>
+				<!-- <div id="guiContener3"><div id="gui3"></div></div> -->
+				<div id="bag3"></div>
+			</div>
+
+			<div id="output31"></div>
+			<div id="output32"></div>
+		</div>
+
+	</body>
+</html>
