@@ -615,6 +615,7 @@
 			n_future:90,
 			current:1
 		}
+		var isPlaying = false;
 
 		function initBVH() {
 			bvhReader1 = new BVH.Reader();
@@ -633,7 +634,8 @@
 			f7 = gui1.addFolder('BVH Animation Rendering');
 			f5 = gui1.addFolder('BVH Animation Playback');
 
-            BVHanimConfig.pause = function() {
+			function pauseAnimation() {
+				isPlaying = false;
 				if (bvhReader1.index !== null) {
 					bvhReader1.play = false;
 				}
@@ -643,8 +645,10 @@
 				if (bvhReader3.index !== null) {
 					bvhReader3.play = false;
 				}
-			};
-            BVHanimConfig.play = function() {
+			}
+
+			function playAnimation() {
+				isPlaying = true;
 				if (bvhReader1.index !== null) {
 					bvhReader1.frame = bvhReader1.frame; 
 					bvhReader1.oldFrame = bvhReader1.frame;
@@ -665,8 +669,12 @@
 					bvhReader3.startTime = bvhReader1.startTime;
 					bvhReader3.play = true;
 				}
-			};
-            BVHanimConfig.next = function() {
+			}
+
+            BVHanimConfig.pause = pauseAnimation;
+            BVHanimConfig.play = playAnimation;
+
+			function nextFrame() {
 				if (bvhReader1.index !== null) {
 					bvhReader1.next();
 				}
@@ -676,8 +684,9 @@
 				if (bvhReader3.index !== null) {
 					bvhReader3.next();
 				}
-			};
-            BVHanimConfig.prev = function() {
+			}
+
+			function prevFrame() {
 				if (bvhReader1.index !== null) {
 					bvhReader1.prev();
 				}
@@ -687,9 +696,14 @@
 				if (bvhReader3.index !== null) {
 					bvhReader3.prev();
 				}
-			};
+			}
 
-            f5.add( BVHanimConfig, 'speed', 0.1, 2 ).onChange( function() {
+            BVHanimConfig.next = nextFrame;
+            BVHanimConfig.prev = prevFrame;
+
+			var speed_min = 0.1;
+			var speed_max = 2;
+			function changeSpeed() {
 				if (bvhReader1.index !== null) {
 					bvhReader1.speed = BVHanimConfig.speed;
 				}
@@ -699,7 +713,67 @@
 				if (bvhReader3.index !== null) {
 					bvhReader3.speed = BVHanimConfig.speed;
 				}
-			});;
+			}
+
+            speedController = f5.add( BVHanimConfig, 'speed', speed_min, speed_max ).onChange( changeSpeed );
+
+			function changeSpeed2(inc) {
+				temp_speed = BVHanimConfig.speed + inc;
+				if (temp_speed > speed_max) temp_speed = speed_max;
+				else if (temp_speed < speed_min) temp_speed = speed_min;
+				console.log('Speed: '+temp_speed);
+
+				if (bvhReader1.index !== null) {
+					BVHanimConfig.speed = temp_speed;
+					bvhReader1.speed = BVHanimConfig.speed;
+				}
+				if (bvhReader2.index !== null) {
+					BVHanimConfig.speed = temp_speed;
+					bvhReader2.speed = BVHanimConfig.speed;
+				}
+				if (bvhReader3.index !== null) {
+					BVHanimConfig.speed = temp_speed;
+					bvhReader3.speed = BVHanimConfig.speed;
+				}
+				speedController.updateDisplay();
+			}
+
+			document.onkeydown = function(e) {
+				switch(e.which) {
+					case 37: // left
+					console.log('left');
+					prevFrame();
+					break;
+
+					case 38: // up
+					console.log('up');
+					changeSpeed2(0.1);
+					break;
+
+					case 39: // right
+					console.log('right');
+					nextFrame();
+					break;
+
+					case 40: // down
+					console.log('down');
+					changeSpeed2(-0.1);
+					break;
+
+					case 32: // space
+					console.log('space');
+					if (isPlaying == true) {
+						pauseAnimation();
+					}
+					else {
+						playAnimation();
+					}
+					break;
+
+					default: return; // exit this handler for other keys
+				}
+				e.preventDefault(); // prevent the default action (scroll / move caret)
+			};
 
             f5.add( BVHanimConfig, 'play' );
 			f5.add( BVHanimConfig, 'pause' );
