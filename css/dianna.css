@@ -69,6 +69,17 @@ body {
   text-shadow: 1px 1px 0px #000;
 }
 
+#filesx_trans {
+  position: absolute;
+  bottom:45px;
+  left:10px;
+  color: #a2a2a2;
+  text-align: left;
+  font-size:12px;
+  font-weight:normal;
+  text-shadow: 1px 1px 0px #000;
+}
+
 #output12, #output22, #output32 {
   position: absolute;
   bottom:30px;
