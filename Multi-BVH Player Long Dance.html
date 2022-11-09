@@ -645,6 +645,7 @@
 			n_past:90,
 			n_trans:30,
 			n_future:90,
+			show_trans:true,
 			current:1
 		}
 		var isPlaying = false;
@@ -663,7 +664,7 @@
 		function initBVHGui(n=1000) {
 
 			f6 = gui1.addFolder('BVH Skeleton');
-			// f7 = gui1.addFolder('BVH Animation Rendering');
+			f7 = gui1.addFolder('BVH Animation Rendering');
 			f5 = gui1.addFolder('BVH Animation Playback');
 
 			function pauseAnimation() {
@@ -747,7 +748,7 @@
 				}
 			}
 
-            speedController = f5.add( BVHanimConfig, 'speed', speed_min, speed_max ).onChange( changeSpeed );
+            speedController = f5.add( BVHanimConfig, 'speed', speed_min, speed_max ).name('Speed').onChange( changeSpeed );
 
 			function changeSpeed2(inc) {
 				temp_speed = BVHanimConfig.speed + inc;
@@ -807,11 +808,11 @@
 				e.preventDefault(); // prevent the default action (scroll / move caret)
 			};
 
-            f5.add( BVHanimConfig, 'play' );
-			f5.add( BVHanimConfig, 'pause' );
-			f5.add( BVHanimConfig, 'prev' );
-            f5.add( BVHanimConfig, 'next' );
-			currentFrameController = f5.add( BVHanimConfig, 'current', 1, 1000 );
+            f5.add( BVHanimConfig, 'play' ).name('Play');
+			f5.add( BVHanimConfig, 'pause' ).name('Pause');
+			f5.add( BVHanimConfig, 'prev' ).name('Previous frame');
+            f5.add( BVHanimConfig, 'next' ).name('Next frame');
+			currentFrameController = f5.add( BVHanimConfig, 'current', 1, 1000 ).name('Current frame');
 			currentFrameController.onChange( function() { 
 				// console.log(bvhReader1.numFrames); 
 				// currentFrameController.updateDisplay();
@@ -839,10 +840,10 @@
 				}
 			});
 
-            f6.add( BVHanimConfig, 'px', -100, 100 ).onChange( function() { positionBVH() });;
-            f6.add( BVHanimConfig, 'py', -100, 100 ).onChange( function() { positionBVH() });;
-            f6.add( BVHanimConfig, 'pz', -100, 100 ).onChange( function() { positionBVH() });;
-            f6.add( BVHanimConfig, 'boneSize', 0.5, 5 ).onChange( function() {
+            f6.add( BVHanimConfig, 'px', -100, 100 ).name('Origin x').onChange( function() { positionBVH() });;
+            f6.add( BVHanimConfig, 'py', -100, 100 ).name('Origin y').onChange( function() { positionBVH() });;
+            f6.add( BVHanimConfig, 'pz', -100, 100 ).name('Origin z').onChange( function() { positionBVH() });;
+            f6.add( BVHanimConfig, 'boneSize', 0.5, 5 ).name('Bone Thickness').onChange( function() {
 				if (bvhReader1.index !== null) {
 					bvhReader1.boneSize = BVHanimConfig.boneSize;
 					bvhReader1.showCurrentFrame(); 
@@ -859,7 +860,7 @@
 					bvhReader3.play = true;
 				}
 			});
-			f6.add( BVHanimConfig, 'skeletonSize', 0.1, 5 ).onChange( function() {
+			f6.add( BVHanimConfig, 'skeletonSize', 0.1, 5 ).name('Skeleton Size').onChange( function() {
 				if (bvhReader1.index !== null) {
 					bvhReader1.reScale(BVHanimConfig.skeletonSize);
 					bvhReader1.showCurrentFrame(); 
@@ -931,10 +932,30 @@
 			// 		console.log(f7);
 			// 	}
 			// });
+			f7.add( BVHanimConfig, 'show_trans' ).name("Show Transitions").onChange( function() {
+				if (bvhReader1.index !== null) {
+					bvhReader1.show_trans = BVHanimConfig.show_trans;
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.play = true;
+				}
+				if (bvhReader2.index !== null) {
+					bvhReader2.show_trans = BVHanimConfig.show_trans;
+					bvhReader2.showCurrentFrame(); 
+					bvhReader2.play = true;
+				}
+				if (bvhReader3.index !== null) {
+					bvhReader3.show_trans = BVHanimConfig.show_trans;
+					bvhReader3.showCurrentFrame(); 
+					bvhReader3.play = true;
+				}
+				if (bvhReader1.index == null) {
+					console.log(f7);
+				}
+			});
 
 			f5.open();
 			f6.open();
-			// f7.open();
+			f7.open();
 
 		}
 		function positionBVH() {
@@ -1019,7 +1040,7 @@
 		//-----------------------------------------------------
 
 		function addGUI() {
-			gui1 = new dat.GUI({autoPlace:false, width:204});
+			gui1 = new dat.GUI({autoPlace:false, width:245});
 			document.getElementById('gui1').appendChild(gui1.domElement);
 			// gui2 = new dat.GUI({autoPlace:false, width:204});
 			// document.getElementById('gui2').appendChild(gui2.domElement);
@@ -1119,7 +1140,9 @@
 				BVH player <a href="http://3dflashlo.wordpress.com/" target="_blank">&nbsp;&nbsp;&nbsp;loth 2014&nbsp;&nbsp;&nbsp;</a>
 			</div> -->
 			<!-- <input type="file" id="files" multiple="multiple" accept=".bvh"/> -->
+			<p id="filesx_trans_desc">Transition txt file:</p>
 			<input type="file" id="filesx_trans" onchange="trySubmitTxt(this.files)" accept="text/plain"/>
+			<p id="filesx_desc">Animation BVH file(s):</p>
 			<input type="file" id="filesx" name="filesx[]" onchange="trySubmitFiles(this.files)" multiple="" accept=".bvh" disabled/>
 		</div>
 

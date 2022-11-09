@@ -38,6 +38,8 @@ BVH.Reader = function(){
 	this.n_trans = 30;
 	this.n_future = 90;
 
+	this.show_trans = true;
+
 	// this.material = new THREE.MeshNormalMaterial();//new THREE.MeshBasicMaterial({ color:0xffffff });
 	this.material = new THREE.MeshBasicMaterial({ color:0xdbfff8, vertexColors: THREE.FaceColors });
 	// this.material = new THREE.MeshLambertMaterial({color: 0xdbfff8, side: THREE.DoubleSide, emissive: 0xdbfff8})
@@ -203,19 +205,24 @@ BVH.Reader.prototype = {
 
     		if ( node.name !== 'Site' ){
 
-				if (this.frame > 0 && this.frame <= this.n_past) {
-					bone.material.color.set(0xd25151);
-					// bone.material = self.material_interp;
-					// bone.material.needsUpdate = true;
-				}
-				else if (this.frame > this.n_past && this.frame <= this.n_past+this.n_trans) {
-					bone.material.color.setHex(0xdbfff8);
-				}
-				else if (this.frame > this.n_past+this.n_trans && this.frame <= this.n_past+this.n_trans+this.n_future) {
-					bone.material.color.setHex(0xd25151);
+				if (this.show_trans) {
+					if (this.frame > 0 && this.frame <= this.n_past) {
+						bone.material.color.setHex(0xd25151);
+						// bone.material = self.material_interp;
+						// bone.material.needsUpdate = true;
+					}
+					else if (this.frame > this.n_past && this.frame <= this.n_past+this.n_trans) {
+						bone.material.color.setHex(0xdbfff8);
+					}
+					else if (this.frame > this.n_past+this.n_trans && this.frame <= this.n_past+this.n_trans+this.n_future) {
+						bone.material.color.setHex(0xd25151);
+					}
+					else {
+						bone.material.color.setHex(0x6e777c);
+					}
 				}
 				else {
-					bone.material.color.setHex(0x6e777c);
+					bone.material.color.setHex(0xd25151);
 				}
 
 	    		mtx = node.matrixWorld;

@@ -39,6 +39,7 @@ BVH.Reader = function(){
 	this.n_future = 90;
 
 	this.transitions = [];
+	this.show_trans = true;
 	// console.log(this.transitions);
 
 	// this.material = new THREE.MeshNormalMaterial();//new THREE.MeshBasicMaterial({ color:0xffffff });
@@ -184,17 +185,23 @@ BVH.Reader.prototype = {
 
     },
     updateSkeleton:function () {
-		if (this.frame > 0 && this.frame <= this.n_past) {
-			debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(motion A) '+this.frame);
-		}
-		else if (this.frame > this.n_past && this.frame <= this.n_past+this.n_trans) {
+		// if (this.frame > 0 && this.frame <= this.n_past) {
+		// 	debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(motion A) '+this.frame);
+		// }
+		// else if (this.frame > this.n_past && this.frame <= this.n_past+this.n_trans) {
+		// 	debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(Transition) '+this.frame);
+		// }
+		// else if (this.frame > this.n_past+this.n_trans && this.frame <= this.n_past+this.n_trans+this.n_future) {
+		// 	debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(motion B) '+this.frame);
+		// }
+		// else {
+		// 	debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(Invalid) '+this.frame);
+		// }
+		if (this.transitions[this.frame] == 1) {
 			debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(Transition) '+this.frame);
 		}
-		else if (this.frame > this.n_past+this.n_trans && this.frame <= this.n_past+this.n_trans+this.n_future) {
-			debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(motion B) '+this.frame);
-		}
 		else {
-			debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(Invalid) '+this.frame);
+			debugTell(this.index, "BVH frame:"+this.numFrames+" s/f:"+this.secsPerFrame + " channels:"+this.channels.length + " node:"+ this.nodes.length+'<br/>(motion) '+this.frame);
 		}
 
     	var mtx, node, bone;
@@ -220,14 +227,12 @@ BVH.Reader.prototype = {
 				// else {
 				// 	bone.material.color.setHex(0x6e777c);
 				// }
-
-				if (this.transitions[this.frame] == 1) {
+				if (this.show_trans && this.transitions[this.frame] == 1) {
 					bone.material.color.setHex(0xdbfff8);
 				}
 				else {
 					bone.material.color.setHex(0xd25151);
 				}
-
 
 	    		mtx = node.matrixWorld;
 	    		bone.position.setFromMatrixPosition( mtx );
