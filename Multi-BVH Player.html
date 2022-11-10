@@ -813,88 +813,103 @@
             f6.add( BVHanimConfig, 'pz', -100, 100 ).name('Origin z').onChange( function() { positionBVH() });;
             f6.add( BVHanimConfig, 'boneSize', 0.5, 5 ).name('Bone Thickness').onChange( function() {
 				if (bvhReader1.index !== null) {
+					isPlaying1 = bvhReader1.play;
 					bvhReader1.boneSize = BVHanimConfig.boneSize;
 					bvhReader1.showCurrentFrame(); 
-					bvhReader1.play = true;
+					bvhReader1.play = isPlaying1;
 				}
 				if (bvhReader2.index !== null) {
+					isPlaying2 = bvhReader2.play;
 					bvhReader2.boneSize = BVHanimConfig.boneSize;
 					bvhReader2.showCurrentFrame(); 
-					bvhReader2.play = true;
+					bvhReader2.play = isPlaying2;
 				}
 				if (bvhReader3.index !== null) {
+					isPlaying3 = bvhReader3.play;
 					bvhReader3.boneSize = BVHanimConfig.boneSize;
 					bvhReader3.showCurrentFrame(); 
-					bvhReader3.play = true;
+					bvhReader3.play = isPlaying3;
 				}
 			});
 			f6.add( BVHanimConfig, 'skeletonSize', 0.1, 5 ).name('Skeleton Size').onChange( function() {
 				if (bvhReader1.index !== null) {
+					isPlaying1 = bvhReader1.play;
 					bvhReader1.reScale(BVHanimConfig.skeletonSize);
 					bvhReader1.showCurrentFrame(); 
-					bvhReader1.play = true;
+					bvhReader1.play = isPlaying1;
 				}
 				if (bvhReader2.index !== null) {
+					isPlaying2 = bvhReader2.play;
 					bvhReader2.reScale(BVHanimConfig.skeletonSize);
 					bvhReader2.showCurrentFrame(); 
-					bvhReader2.play = true;
+					bvhReader2.play = isPlaying2;
 				}
 				if (bvhReader3.index !== null) {
+					isPlaying3 = bvhReader3.play;
 					bvhReader3.reScale(BVHanimConfig.skeletonSize);
 					bvhReader3.showCurrentFrame(); 
-					bvhReader3.play = true;
+					bvhReader3.play = isPlaying3;
 				}
 			});
 
 			f7.add( BVHanimConfig, 'n_past', 0, 180 ).name('Num past').onChange( function() {
 				if (bvhReader1.index !== null) {
+					isPlaying1 = bvhReader1.play;
 					bvhReader1.n_past = BVHanimConfig.n_past;
 					bvhReader1.showCurrentFrame(); 
-					bvhReader1.play = true;
+					bvhReader1.play = isPlaying1;
 				}
 				if (bvhReader2.index !== null) {
+					isPlaying2 = bvhReader2.play;
 					bvhReader2.n_past = BVHanimConfig.n_past;
 					bvhReader2.showCurrentFrame(); 
-					bvhReader2.play = true;
+					bvhReader2.play = isPlaying2;
 				}
 				if (bvhReader3.index !== null) {
+					isPlaying3 = bvhReader3.play;
 					bvhReader3.n_past = BVHanimConfig.n_past;
 					bvhReader3.showCurrentFrame(); 
-					bvhReader3.play = true;
+					bvhReader3.play = isPlaying3;
 				}
 			});
 			f7.add( BVHanimConfig, 'n_trans', 0, 120 ).name('Num transitions').onChange( function() {
 				if (bvhReader1.index !== null) {
+					isPlaying1 = bvhReader1.play;
 					bvhReader1.n_trans = BVHanimConfig.n_trans;
 					bvhReader1.showCurrentFrame(); 
-					bvhReader1.play = true;
+					bvhReader1.play = isPlaying1;
 				}
 				if (bvhReader2.index !== null) {
+					isPlaying2 = bvhReader2.play;
 					bvhReader2.n_trans = BVHanimConfig.n_trans;
 					bvhReader2.showCurrentFrame(); 
-					bvhReader2.play = true;
+					bvhReader2.play = isPlaying2;
 				}
 				if (bvhReader3.index !== null) {
+					isPlaying3 = bvhReader3.play;
 					bvhReader3.n_trans = BVHanimConfig.n_trans;
 					bvhReader3.showCurrentFrame(); 
-					bvhReader3.play = true;
+					bvhReader3.play = isPlaying3;
 				}
 			});
 			f7.add( BVHanimConfig, 'n_future', 0, 180 ).name('Num future').onChange( function() {
 				if (bvhReader1.index !== null) {
+					isPlaying1 = bvhReader1.play;
 					bvhReader1.n_future = BVHanimConfig.n_future;
 					bvhReader1.showCurrentFrame(); 
-					bvhReader1.play = true;
+					bvhReader1.play = isPlaying1;
 				}
 				if (bvhReader2.index !== null) {
+					isPlaying2 = bvhReader2.play;
 					bvhReader2.n_future = BVHanimConfig.n_future;
 					bvhReader2.showCurrentFrame(); 
-					bvhReader2.play = true;
+					bvhReader2.play = isPlaying2;
 				}
 				if (bvhReader3.index !== null) {
+					isPlaying3 = bvhReader3.play;
 					bvhReader3.n_future = BVHanimConfig.n_future;
 					bvhReader3.showCurrentFrame(); 
-					bvhReader3.play = true;
+					bvhReader3.play = isPlaying3;
 				}
 				if (bvhReader1.index == null) {
 					console.log(f7);
@@ -902,19 +917,22 @@
 			});
 			f7.add( BVHanimConfig, 'show_trans' ).name("Show Transitions").onChange( function() {
 				if (bvhReader1.index !== null) {
+					isPlaying1 = bvhReader1.play;
 					bvhReader1.show_trans = BVHanimConfig.show_trans;
 					bvhReader1.showCurrentFrame(); 
-					bvhReader1.play = true;
+					bvhReader1.play = isPlaying1;
 				}
 				if (bvhReader2.index !== null) {
+					isPlaying2 = bvhReader2.play;
 					bvhReader2.show_trans = BVHanimConfig.show_trans;
 					bvhReader2.showCurrentFrame(); 
-					bvhReader2.play = true;
+					bvhReader2.play = isPlaying2;
 				}
 				if (bvhReader3.index !== null) {
+					isPlaying3 = bvhReader3.play;
 					bvhReader3.show_trans = BVHanimConfig.show_trans;
 					bvhReader3.showCurrentFrame(); 
-					bvhReader3.play = true;
+					bvhReader3.play = isPlaying3;
 				}
 				if (bvhReader1.index == null) {
 					console.log(f7);
@@ -928,19 +946,22 @@
 		}
 		function positionBVH() {
 			if (bvhReader1.index !== null) {
+				isPlaying1 = bvhReader1.play;
 				bvhReader1.rePosition(new THREE.Vector3( BVHanimConfig.px || 0, BVHanimConfig.py|| 0, BVHanimConfig.pz|| 0 ));
 				bvhReader1.showCurrentFrame(); 
-				bvhReader1.play = true;
+				bvhReader1.play = isPlaying1;
 			}
 			if (bvhReader2.index !== null) {
+				isPlaying2 = bvhReader2.play;
 				bvhReader2.rePosition(new THREE.Vector3( BVHanimConfig.px || 0, BVHanimConfig.py|| 0, BVHanimConfig.pz|| 0 ));
 				bvhReader2.showCurrentFrame(); 
-				bvhReader2.play = true;
+				bvhReader2.play = isPlaying2;
 			}
 			if (bvhReader3.index !== null) {
+				isPlaying3 = bvhReader3.play;
 				bvhReader3.rePosition(new THREE.Vector3( BVHanimConfig.px || 0, BVHanimConfig.py|| 0, BVHanimConfig.pz|| 0 ));
 				bvhReader3.showCurrentFrame(); 
-				bvhReader3.play = true;
+				bvhReader3.play = isPlaying3;
 			}
 		}
 
