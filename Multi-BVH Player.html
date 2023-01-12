@@ -551,9 +551,9 @@
 		}
 
 		function addBasicObject() {
-			var skyMaterial1 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
-			var skyMaterial2 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
-			var skyMaterial3 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial1 = new THREE.MeshBasicMaterial( { color: 0x414141, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial2 = new THREE.MeshBasicMaterial( { color: 0x414141, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial3 = new THREE.MeshBasicMaterial( { color: 0x414141, side: THREE.BackSide, depthWrite: false } );
 		    sky1 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial1 );
 			sky2 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial2 );
 			sky3 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial3 );
@@ -561,40 +561,41 @@
 			scene2.add( sky2 );
 			scene3.add( sky3 );
 
-			var groundMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
-			var blendings1 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
-			groundMaterial1.blending = THREE[ blendings1[ 4 ] ];
-			ground1 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial1);
-			ground1.position.set( 0, 0, 0 );
-			ground1.rotation.x = - Math.PI / 2;
-			ground1.receiveShadow = true;
-			var groundMaterial2 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
-			var blendings2 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
-			groundMaterial2.blending = THREE[ blendings2[ 4 ] ];
-			ground2 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial2);
-			ground2.position.set( 0, 0, 0 );
-			ground2.rotation.x = - Math.PI / 2;
-			ground2.receiveShadow = true;
-			var groundMaterial3 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
-			var blendings3 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
-			groundMaterial3.blending = THREE[ blendings3[ 4 ] ];
-			ground3 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial3);
-			ground3.position.set( 0, 0, 0 );
-			ground3.rotation.x = - Math.PI / 2;
-			ground3.receiveShadow = true;
-			scene1.add( ground1 );
-			scene2.add( ground2 );
-			scene3.add( ground3 );
+			// // Commented out the following for demo purposes
+			// var groundMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			// var blendings1 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			// groundMaterial1.blending = THREE[ blendings1[ 4 ] ];
+			// ground1 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial1);
+			// ground1.position.set( 0, 0, 0 );
+			// ground1.rotation.x = - Math.PI / 2;
+			// ground1.receiveShadow = true;
+			// var groundMaterial2 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			// var blendings2 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			// groundMaterial2.blending = THREE[ blendings2[ 4 ] ];
+			// ground2 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial2);
+			// ground2.position.set( 0, 0, 0 );
+			// ground2.rotation.x = - Math.PI / 2;
+			// ground2.receiveShadow = true;
+			// var groundMaterial3 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			// var blendings3 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			// groundMaterial3.blending = THREE[ blendings3[ 4 ] ];
+			// ground3 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial3);
+			// ground3.position.set( 0, 0, 0 );
+			// ground3.rotation.x = - Math.PI / 2;
+			// ground3.receiveShadow = true;
+			// scene1.add( ground1 );
+			// scene2.add( ground2 );
+			// scene3.add( ground3 );
 
-			var helper21 = new THREE.GridHelper( 100, 50 );
-			helper21.setColors( 0x00ff00, 0x888888 );
-			var helper22 = new THREE.GridHelper( 100, 50 );
-			helper22.setColors( 0x00ff00, 0x888888 );
-			var helper23 = new THREE.GridHelper( 100, 50 );
-			helper23.setColors( 0x00ff00, 0x888888 );
-			scene1.add( helper21 );
-			scene2.add( helper22 );
-			scene3.add( helper23 );
+			// var helper21 = new THREE.GridHelper( 100, 50 );
+			// helper21.setColors( 0x00ff00, 0x888888 );
+			// var helper22 = new THREE.GridHelper( 100, 50 );
+			// helper22.setColors( 0x00ff00, 0x888888 );
+			// var helper23 = new THREE.GridHelper( 100, 50 );
+			// helper23.setColors( 0x00ff00, 0x888888 );
+			// scene1.add( helper21 );
+			// scene2.add( helper22 );
+			// scene3.add( helper23 );
 		}
 
 

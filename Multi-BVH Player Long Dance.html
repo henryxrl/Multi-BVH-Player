@@ -583,9 +583,9 @@
 		}
 
 		function addBasicObject() {
-			var skyMaterial1 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
-			var skyMaterial2 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
-			var skyMaterial3 = new THREE.MeshBasicMaterial( { color: 0x303030, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial1 = new THREE.MeshBasicMaterial( { color: 0x414141, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial2 = new THREE.MeshBasicMaterial( { color: 0x414141, side: THREE.BackSide, depthWrite: false } );
+			var skyMaterial3 = new THREE.MeshBasicMaterial( { color: 0x414141, side: THREE.BackSide, depthWrite: false } );
 		    sky1 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial1 );
 			sky2 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial2 );
 			sky3 = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), skyMaterial3 );
@@ -947,7 +947,7 @@
 			// 		console.log(f7);
 			// 	}
 			// });
-			f7.add( BVHanimConfig, 'show_trans' ).name("Show Transitions1").onChange( function() {
+			f7.add( BVHanimConfig, 'show_trans' ).name("Show Transitions").onChange( function() {
 				if (bvhReader1.index !== null) {
 					isPlaying1 = bvhReader1.play;
 					bvhReader1.show_trans = BVHanimConfig.show_trans;

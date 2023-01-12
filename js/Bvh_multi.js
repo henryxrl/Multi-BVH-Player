@@ -41,7 +41,8 @@ BVH.Reader = function(){
 	this.show_trans = true;
 
 	// this.material = new THREE.MeshNormalMaterial();//new THREE.MeshBasicMaterial({ color:0xffffff });
-	this.material = new THREE.MeshBasicMaterial({ color:0xdbfff8, vertexColors: THREE.FaceColors });
+	// this.material = new THREE.MeshBasicMaterial({ color:0xdbfff8, vertexColors: THREE.FaceColors });
+	this.material = new THREE.MeshLambertMaterial({ color:0xffffff, emissive:0x303030});
 	// this.material = new THREE.MeshLambertMaterial({color: 0xdbfff8, side: THREE.DoubleSide, emissive: 0xdbfff8})
 	// this.white = new THREE.Color( 0xffffff );
 	// this.red = new THREE.Color( 0xd25151 );
@@ -158,16 +159,31 @@ BVH.Reader.prototype = {
     	geo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, 0.5 ) );
     	//var mat = new THREE.MeshNormalMaterial();
 
+		var head = new THREE.SphereGeometry( this.boneSize*2 );
+		head.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, 0.5 ) );
+
     	for(var i=0; i<n; i++){
     		node = this.nodes[i];
+			// console.log(node.name);
     		if ( node.name !== 'Site' ){
-				bone = new THREE.Mesh(geo, this.material);
-    			// bone = new THREE.Mesh(geo, this.material_interp);
-    			bone.castShadow = true;
-    			bone.rotation.order = 'XYZ';
-	    		bone.name = node.name;
-	    		this.skeleton.add(bone);
-	    		this.bones[i] = bone;
+				if (node.name.includes('head')){
+					bone = new THREE.Mesh(head, this.material);
+					// bone = new THREE.Mesh(geo, this.material_interp);
+					bone.castShadow = true;
+					bone.rotation.order = 'XYZ';
+					bone.name = node.name;
+					this.skeleton.add(bone);
+					this.bones[i] = bone;
+				}
+				else {
+					bone = new THREE.Mesh(geo, this.material);
+					// bone = new THREE.Mesh(geo, this.material_interp);
+					bone.castShadow = true;
+					bone.rotation.order = 'XYZ';
+					bone.name = node.name;
+					this.skeleton.add(bone);
+					this.bones[i] = bone;
+				}
     	    }
     	}
 
@@ -207,22 +223,26 @@ BVH.Reader.prototype = {
 
 				if (this.show_trans) {
 					if (this.frame > 0 && this.frame <= this.n_past) {
-						bone.material.color.setHex(0xd25151);
+						// bone.material.color.setHex(0xd25151);
+						bone.material.color.setHex(0xffffff);
 						// bone.material = self.material_interp;
 						// bone.material.needsUpdate = true;
 					}
 					else if (this.frame > this.n_past && this.frame <= this.n_past+this.n_trans) {
-						bone.material.color.setHex(0xdbfff8);
+						// bone.material.color.setHex(0xdbfff8);
+						bone.material.color.setHex(0xd25151);
 					}
 					else if (this.frame > this.n_past+this.n_trans && this.frame <= this.n_past+this.n_trans+this.n_future) {
-						bone.material.color.setHex(0xd25151);
+						// bone.material.color.setHex(0xd25151);
+						bone.material.color.setHex(0xffffff);
 					}
 					else {
 						bone.material.color.setHex(0x6e777c);
 					}
 				}
 				else {
-					bone.material.color.setHex(0xd25151);
+					// bone.material.color.setHex(0xd25151);
+					bone.material.color.setHex(0xffffff);
 				}
 
 	    		mtx = node.matrixWorld;
@@ -233,7 +253,9 @@ BVH.Reader.prototype = {
 	    			bone.lookAt(target);
 	    			bone.rotation.z = 0;
 
-	    			if(bone.name==="Head")bone.scale.set(this.boneSize*2,this.boneSize*2,BVH.DistanceTest(bone.position, target)*(this.boneSize*1.5));
+	    			if(bone.name.includes("head")){
+						bone.scale.set(this.boneSize*2,this.boneSize*2,BVH.DistanceTest(bone.position, target)*(this.boneSize*1.5));
+					}
 	    			else bone.scale.set(this.boneSize,this.boneSize,BVH.DistanceTest(bone.position, target));
 	    		}
 	    		/*if(node.parent){
