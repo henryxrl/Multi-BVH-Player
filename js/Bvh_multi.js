@@ -45,8 +45,8 @@ BVH.Reader = function(){
 	this.material = new THREE.MeshLambertMaterial({ color:0xffffff, emissive:0x303030});
 	// this.material = new THREE.MeshLambertMaterial({color: 0xdbfff8, side: THREE.DoubleSide, emissive: 0xdbfff8})
 	// this.white = new THREE.Color( 0xffffff );
-	// this.red = new THREE.Color( 0xd25151 );
-	this.material_interp = new THREE.MeshBasicMaterial({ color:0xd25151, vertexColors: THREE.FaceColors  });
+	// this.red = new THREE.Color( 0xf3b22e );
+	this.material_interp = new THREE.MeshBasicMaterial({ color:0xf3b22e, vertexColors: THREE.FaceColors  });
 }
 
 BVH.Reader.prototype = {
@@ -223,17 +223,17 @@ BVH.Reader.prototype = {
 
 				if (this.show_trans) {
 					if (this.frame > 0 && this.frame <= this.n_past) {
-						// bone.material.color.setHex(0xd25151);
+						// bone.material.color.setHex(0xf3b22e);
 						bone.material.color.setHex(0xffffff);
 						// bone.material = self.material_interp;
 						// bone.material.needsUpdate = true;
 					}
 					else if (this.frame > this.n_past && this.frame <= this.n_past+this.n_trans) {
 						// bone.material.color.setHex(0xdbfff8);
-						bone.material.color.setHex(0xd25151);
+						bone.material.color.setHex(0xf3b22e);
 					}
 					else if (this.frame > this.n_past+this.n_trans && this.frame <= this.n_past+this.n_trans+this.n_future) {
-						// bone.material.color.setHex(0xd25151);
+						// bone.material.color.setHex(0xf3b22e);
 						bone.material.color.setHex(0xffffff);
 					}
 					else {
@@ -241,7 +241,7 @@ BVH.Reader.prototype = {
 					}
 				}
 				else {
-					// bone.material.color.setHex(0xd25151);
+					// bone.material.color.setHex(0xf3b22e);
 					bone.material.color.setHex(0xffffff);
 				}
 
