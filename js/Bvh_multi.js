@@ -237,7 +237,8 @@ BVH.Reader.prototype = {
 						bone.material.color.setHex(0xffffff);
 					}
 					else {
-						bone.material.color.setHex(0x6e777c);
+						// bone.material.color.setHex(0x6e777c);
+						bone.material.color.setHex(0xffffff);
 					}
 				}
 				else {
