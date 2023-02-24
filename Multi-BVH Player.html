@@ -44,6 +44,7 @@
 		var materials = []; 
 		var clock = new THREE.Clock();
 		var ground1, ground2, ground3;
+		var grid1, grid2, grid3;
 
 		var gui1;
 		// var gui2;
@@ -561,41 +562,62 @@
 			scene2.add( sky2 );
 			scene3.add( sky3 );
 
-			// // Commented out the following for demo purposes
-			// var groundMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
-			// var blendings1 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
-			// groundMaterial1.blending = THREE[ blendings1[ 4 ] ];
-			// ground1 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial1);
-			// ground1.position.set( 0, 0, 0 );
-			// ground1.rotation.x = - Math.PI / 2;
-			// ground1.receiveShadow = true;
-			// var groundMaterial2 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
-			// var blendings2 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
-			// groundMaterial2.blending = THREE[ blendings2[ 4 ] ];
-			// ground2 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial2);
-			// ground2.position.set( 0, 0, 0 );
-			// ground2.rotation.x = - Math.PI / 2;
-			// ground2.receiveShadow = true;
-			// var groundMaterial3 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
-			// var blendings3 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
-			// groundMaterial3.blending = THREE[ blendings3[ 4 ] ];
-			// ground3 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial3);
-			// ground3.position.set( 0, 0, 0 );
-			// ground3.rotation.x = - Math.PI / 2;
-			// ground3.receiveShadow = true;
-			// scene1.add( ground1 );
-			// scene2.add( ground2 );
-			// scene3.add( ground3 );
+			if (BVHanimConfig.show_ground) {
+				addGround()
+			}
+		}
 
-			// var helper21 = new THREE.GridHelper( 100, 50 );
-			// helper21.setColors( 0x00ff00, 0x888888 );
-			// var helper22 = new THREE.GridHelper( 100, 50 );
-			// helper22.setColors( 0x00ff00, 0x888888 );
-			// var helper23 = new THREE.GridHelper( 100, 50 );
-			// helper23.setColors( 0x00ff00, 0x888888 );
-			// scene1.add( helper21 );
-			// scene2.add( helper22 );
-			// scene3.add( helper23 );
+		function addGround() {
+			var groundMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			var blendings1 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			groundMaterial1.blending = THREE[ blendings1[ 4 ] ];
+			ground1 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial1);
+			ground1.name = 'ground1'
+			ground1.position.set( 0, 0, 0 );
+			ground1.rotation.x = - Math.PI / 2;
+			ground1.receiveShadow = true;
+			var groundMaterial2 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			var blendings2 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			groundMaterial2.blending = THREE[ blendings2[ 4 ] ];
+			ground2 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial2);
+			ground2.name = 'ground2'
+			ground2.position.set( 0, 0, 0 );
+			ground2.rotation.x = - Math.PI / 2;
+			ground2.receiveShadow = true;
+			var groundMaterial3 = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, transparent: true } );
+			var blendings3 = [ "NoBlending", "NormalBlending", "AdditiveBlending", "SubtractiveBlending", "MultiplyBlending", "AdditiveAlphaBlending" ];
+			groundMaterial3.blending = THREE[ blendings3[ 4 ] ];
+			ground3 = new THREE.Mesh(new THREE.PlaneGeometry( 1000, 1000, 4, 4 ), groundMaterial3);
+			ground3.name = 'ground3'
+			ground3.position.set( 0, 0, 0 );
+			ground3.rotation.x = - Math.PI / 2;
+			ground3.receiveShadow = true;
+			scene1.add( ground1 );
+			scene2.add( ground2 );
+			scene3.add( ground3 );
+
+			grid1 = new THREE.GridHelper( 100, 50 );
+			grid1.name = 'grid1'
+			grid1.setColors( 0x00ff00, 0x888888 );
+			grid2 = new THREE.GridHelper( 100, 50 );
+			grid2.name = 'grid2'
+			grid2.setColors( 0x00ff00, 0x888888 );
+			grid3 = new THREE.GridHelper( 100, 50 );
+			grid3.name = 'grid3'
+			grid3.setColors( 0x00ff00, 0x888888 );
+			scene1.add( grid1 );
+			scene2.add( grid2 );
+			scene3.add( grid3 );
+		}
+
+		function removeGround() {
+			// var selectedObject = scene.getObjectByName('ground1');
+			scene1.remove( ground1 );
+			scene2.remove( ground2 );
+			scene3.remove( ground3 );
+			scene1.remove( grid1 );
+			scene2.remove( grid2 );
+			scene3.remove( grid3 );
 		}
 
 
@@ -615,6 +637,7 @@
 			n_trans:30,
 			n_future:90,
 			show_trans:true,
+			show_ground:true,
 			current:1
 		}
 		var isPlaying = false;
@@ -932,6 +955,47 @@
 				if (bvhReader3.index !== null) {
 					isPlaying3 = bvhReader3.play;
 					bvhReader3.show_trans = BVHanimConfig.show_trans;
+					bvhReader3.showCurrentFrame(); 
+					bvhReader3.play = isPlaying3;
+				}
+				if (bvhReader1.index == null) {
+					console.log(f7);
+				}
+			});
+			f7.add( BVHanimConfig, 'show_ground' ).name("Show Ground").onChange( function() {
+				if (bvhReader1.index !== null) {
+					isPlaying1 = bvhReader1.play;
+					// bvhReader1.show_ground = BVHanimConfig.show_ground;
+					if (BVHanimConfig.show_ground) {
+						addGround()
+					}
+					else {
+						removeGround()
+					}
+					bvhReader1.showCurrentFrame(); 
+					bvhReader1.play = isPlaying1;
+				}
+				if (bvhReader2.index !== null) {
+					isPlaying2 = bvhReader2.play;
+					// bvhReader2.show_ground = BVHanimConfig.show_ground;
+					if (BVHanimConfig.show_ground) {
+						addGround()
+					}
+					else {
+						removeGround()
+					}
+					bvhReader2.showCurrentFrame(); 
+					bvhReader2.play = isPlaying2;
+				}
+				if (bvhReader3.index !== null) {
+					isPlaying3 = bvhReader3.play;
+					// bvhReader3.show_ground = BVHanimConfig.show_ground;
+					if (BVHanimConfig.show_ground) {
+						addGround()
+					}
+					else {
+						removeGround()
+					}
 					bvhReader3.showCurrentFrame(); 
 					bvhReader3.play = isPlaying3;
 				}
